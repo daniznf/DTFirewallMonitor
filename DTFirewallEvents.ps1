@@ -246,6 +246,7 @@ while ($true)
 Displays briefly what your firewall is blocking
 
 .DESCRIPTION
+Dani's Tools Firewall Events
 Version 1.0.0 - April 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
