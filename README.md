@@ -1,5 +1,7 @@
-# DTFirewallEvents
-Displays briefly what your firewall is blocking
+# Dani's Tools Firewall Events
+DTFirewallEvents  
+Displays briefly what your firewall is blocking  
+Copyright (C) 2022 Daniznf
 
 ### Description
 Each time an application gets blocked by firewall it will be displayed **briefly** by this script.
