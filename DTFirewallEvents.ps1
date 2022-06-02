@@ -100,14 +100,20 @@ function ParseEvent {
                 if ($Right.Equals("%%14592"))
                 {
                     $Direction = "IN"
+                    $BgColor = "Red"
+                    $FgColor = "White"
                 }
                 elseif ($Right.Equals("%%14593"))
                 {
                     $Direction = "OUT"
+                    $BgColor = "DarkGreen"
+                    $FgColor = "White"
                 }
                 else
                 {
                     $Direction = "UNKNOWN!"
+                    $BgColor = "DarkGray"
+                    $FgColor = "White"
                 }
             }
 
@@ -236,7 +242,8 @@ function ParseEvent {
     {
         Write-Host $EvTime.TimeOfDay.ToString() " " -NoNewline
         Write-Host "($ProcID)" ( Split-Path $AppName -Leaf ) "" -NoNewline
-        Write-Host $Protocol $Direction
+        Write-Host $Protocol "" -NoNewline
+        Write-Host $Direction -BackgroundColor $BgColor -ForegroundColor $FgColor
         Write-Host $SrcAddress":" $SrcPort " -> " -NoNewline
         Write-Host $DstAddress":" $DstPort
         Write-Host
@@ -246,7 +253,8 @@ function ParseEvent {
         $PadLenght = 12
         Write-Host $EvTime
         Write-Host "Application:".PadRight($PadLenght) "($ProcID)" $AppName
-        Write-Host "Protocol:".PadRight($PadLenght) $Protocol $Direction
+        Write-Host "Protocol:".PadRight($PadLenght) $Protocol "" -NoNewline 
+        Write-Host $Direction -BackgroundColor $BgColor -ForegroundColor $FgColor
         Write-Host "Source:".PadRight($PadLenght) $SrcAddress.PadRight(15) ":" $SrcPort
         Write-Host "Destination:".PadRight($PadLenght) $DstAddress.PadRight(15) ":" $DstPort
         Write-Host
@@ -283,7 +291,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.3.0 - June 2022
+Version 1.4.0 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
