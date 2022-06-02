@@ -25,7 +25,11 @@ param(
     
     [Int32]
     # Time to wait between each follow cycle
-    $FollowTime = 1
+    $FollowTime = 1,
+
+    [switch]
+    # Show some additional informations
+    $Debug
 )
 
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
@@ -36,6 +40,7 @@ function Test-Administrator
     # thanks to https://serverfault.com/a/97599
     
     $User = [Security.Principal.WindowsIdentity]::GetCurrent();
+    if ($Debug) { Write-Host $User.Name }
     (New-Object Security.Principal.WindowsPrincipal $User).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 
@@ -49,6 +54,8 @@ if (-not $(Test-Administrator))
 
 function ParseEvent {
     param([System.ComponentModel.Component] $Event)
+
+    if ($Debug) { Write-Host $Event.Index }
     
     $EvMsg = $Event.Message
     $EvTime =$Event.TimeGenerated
@@ -65,6 +72,8 @@ function ParseEvent {
         {
             $Left = $Left.Trim()
             $Right = $Right.Trim()
+
+            if ($Debug) { Write-Host "|" $Left ":" $Right }
 
             if ($Left.Equals("Application Name"))
             {
@@ -232,13 +241,13 @@ function ParseEvent {
 # Print some recent events
 Get-EventLog -LogName Security -Newest $RecentEvents | Sort-Object -Property Index | ForEach-Object {
     $OldIndex = ParseEvent $_
-    #$OldIndex = $_.Index
 }
 
 # Continue to follow new events
 while ($true)
 {
     $NewIndex = (Get-EventLog -LogName Security -Newest 1).Index
+    if ($Debug) { Write-Host "Old Index: " $OldIndex  "; New Index: " $NewIndex }
     if ($NewIndex -gt $OldIndex)
     {
         # Asking by index is really slow: Get-EventLog -LogName Security -Index $i
