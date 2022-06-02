@@ -28,6 +28,10 @@ param(
     $FollowTime = 1,
 
     [switch]
+    # Show informations using less space
+    $Compact,
+
+    [switch]
     # Show some additional informations
     $Debug
 )
@@ -58,7 +62,7 @@ function ParseEvent {
     if ($Debug) { Write-Host $Event.Index }
     
     $EvMsg = $Event.Message
-    $EvTime =$Event.TimeGenerated
+    $EvTime = $Event.TimeGenerated
 
     $MsgLines = $EvMsg.Split([System.Environment]::NewLine)
 
@@ -228,13 +232,25 @@ function ParseEvent {
         }
     }
     
-    $PadLenght = 12
-    Write-Host $EvTime 
-    Write-Host "Application:".PadRight($PadLenght) "($ProcID)" $AppName
-    Write-Host "Protocol:".PadRight($PadLenght) $Protocol $Direction
-    Write-Host "Source:".PadRight($PadLenght) $SrcAddress.PadRight(15) ":" $SrcPort
-    Write-Host "Destination:".PadRight($PadLenght) $DstAddress.PadRight(15) ":" $DstPort
-    Write-Host
+    if ($Compact)
+    {
+        Write-Host $EvTime.TimeOfDay.ToString() " " -NoNewline
+        Write-Host "($ProcID)" ( Split-Path $AppName -Leaf ) "" -NoNewline
+        Write-Host $Protocol $Direction
+        Write-Host $SrcAddress":" $SrcPort " -> " -NoNewline
+        Write-Host $DstAddress":" $DstPort
+        Write-Host
+    }
+    else
+    {
+        $PadLenght = 12
+        Write-Host $EvTime
+        Write-Host "Application:".PadRight($PadLenght) "($ProcID)" $AppName
+        Write-Host "Protocol:".PadRight($PadLenght) $Protocol $Direction
+        Write-Host "Source:".PadRight($PadLenght) $SrcAddress.PadRight(15) ":" $SrcPort
+        Write-Host "Destination:".PadRight($PadLenght) $DstAddress.PadRight(15) ":" $DstPort
+        Write-Host
+    }
     $Event.Index
 }
 
@@ -267,7 +283,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.2.0 - June 2022
+Version 1.3.0 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
