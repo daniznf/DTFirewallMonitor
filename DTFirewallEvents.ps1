@@ -28,6 +28,8 @@ param(
     $FollowTime = 1
 )
 
+if ($RecentEvents -lt 1) { $RecentEvents = 1 }
+
 function Test-Administrator  
 {  
     # Returns true if this script is run as administrator
@@ -223,25 +225,28 @@ function ParseEvent {
     Write-Host "Protocol:".PadRight($PadLenght) $Protocol $Direction
     Write-Host "Source:".PadRight($PadLenght) $SrcAddress.PadRight(15) ":" $SrcPort
     Write-Host "Destination:".PadRight($PadLenght) $DstAddress.PadRight(15) ":" $DstPort
-    
     Write-Host
+    $Event.Index
 }
 
 # Print some recent events
-Get-EventLog -LogName Security -Newest $RecentEvents | Sort-Object -Property TimeGenerated | ForEach-Object {
-    ParseEvent $_
+Get-EventLog -LogName Security -Newest $RecentEvents | Sort-Object -Property Index | ForEach-Object {
+    $OldIndex = ParseEvent $_
+    #$OldIndex = $_.Index
 }
 
 # Continue to follow new events
-$OldIndex = 0
 while ($true)
 {
-    $EvObj = Get-EventLog -LogName Security -Newest 1
-    $NewIndex = $EvObj.Index
-    if ($OldIndex -ne $NewIndex)
+    $NewIndex = (Get-EventLog -LogName Security -Newest 1).Index
+    if ($NewIndex -gt $OldIndex)
     {
-        $OldIndex = $NewIndex
-        ParseEvent $EvObj
+        # Asking by index is really slow: Get-EventLog -LogName Security -Index $i
+        $ListEvt = Get-EventLog -LogName Security -Newest ($NewIndex - $OldIndex) | Sort-Object -Property Index
+        $ListEvt | ForEach-Object {
+            $OldIndex = ParseEvent $_
+        }
+
     }
     Start-Sleep $FollowTime
 }
@@ -253,7 +258,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.1.0 - May 2022
+Version 1.2.0 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
