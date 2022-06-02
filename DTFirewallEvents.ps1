@@ -84,10 +84,15 @@ function ParseEvent {
                 $AppName = $Right
                 # $AppName is something like 
                 # \device\harddiskvolume1\program files\program\program.exe
-                $Letter = (Get-Volume -FilePath $AppName).DriveLetter
-                $AppName = $AppName.Remove(0, $AppName.IndexOf("\",1))
-                $AppName = $AppName.Remove(0, $AppName.IndexOf("\",1))
-                $AppName = $Letter + ":" + $AppName 
+                # or something like
+                # System
+                if ($AppName.Contains("\"))
+                {
+                    $Letter = (Get-Volume -FilePath $AppName).DriveLetter
+                    $AppName = $AppName.Remove(0, $AppName.IndexOf("\",1))
+                    $AppName = $AppName.Remove(0, $AppName.IndexOf("\",1))
+                    $AppName = $Letter + ":" + $AppName 
+                }
             }
 
             if ($Left.Equals("Process ID"))
@@ -291,7 +296,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.4.0 - June 2022
+Version 1.4.1 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
