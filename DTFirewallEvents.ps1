@@ -61,6 +61,14 @@ function ParseEvent {
 
     if ($Debug) { Write-Host $Event.Index }
     
+    # 5154 Listen permitted
+    # 5155 Listen blocked
+    # 5156 Connection permitted
+    # 5157 Connection blocked
+    # 5158 Bind permitted
+    # 5159 Bind blocked
+    if ($Event.InstanceId -NotIn "5154","5155","5156","5157","5158","5159") { Return $Event.Index }
+    
     $EvMsg = $Event.Message
     $EvTime = $Event.TimeGenerated
 
@@ -296,7 +304,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.4.1 - June 2022
+Version 1.4.2 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
