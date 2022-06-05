@@ -1,0 +1,8 @@
+SourceIP,SourcePort,DestinationIP,DestinationPort,Protocol,Direction,ProgramPath,Note
+192.168.100.1,81,10.0.0.1,8081,TCP,OUT,C:\program files\program1.exe,Exclude events about outgoing TCP traffic from Source IP and port to Destination IP and port originated from this program
+,,10.0.0.2,,UDP,OUT,C:\program files\program2.exe,Exclude events about outgoing UDP traffic directed to Destination IP originated from this program
+10.0.0.3,83,192.168.100.1,8083,TCP,IN,,Exclude events about incoming TCP traffic from Source IP and port to Destination IP and port
+,,,12345,,,,Exclude events about traffic with this Destination Port
+,,,,,,,Empty lines will be discarded
+,,,,,,,"Every line is treated with an AND logic for all columns, so the less informations you write, the more events you are going to exclude!"
+,,,8080,,OUT,C:\program files\program3.exe,Exclude events about outgoing traffic directed to Destination port from this program

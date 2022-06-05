@@ -19,6 +19,10 @@
 #>
 
 param(
+    [String]
+    # CSV File path with items to exclude
+    $Exclusions,
+
     [Int32] 
     # Initially shows this number of events
     $RecentEvents = 20,
@@ -70,7 +74,7 @@ function ParseEvent {
     param([System.ComponentModel.Component] $Event)
 
     if ($Debug) { Write-Host $Event.Index }
-    
+
     # 5154 Listen permitted
     # 5155 Listen blocked
     # 5156 Connection permitted
@@ -83,7 +87,6 @@ function ParseEvent {
     $EvTime = $Event.TimeGenerated
 
     $MsgLines = $EvMsg.Split([System.Environment]::NewLine)
-
     $MsgLines | ForEach-Object {
         $Splitted = $_.Split(":")
 
@@ -261,6 +264,35 @@ function ParseEvent {
         }
     }
     
+    # ForEach-Object doesn't Return out of function
+    foreach ($ExcRow in $ListExclusions) {
+    # For each line of the CSV, that has at least one not empty value, all
+    # not empty values must be equal to this event's corresponding value
+    # to exclude this event
+        if (($ExcRow.SourceIP -ne "") -or ($ExcRow.SourcePort -ne "") -or 
+            ($ExcRow.DestinationIP -ne "") -or ($ExcRow.DestinationPort -ne "") -or 
+            ($ExcRow.Protocol -ne "") -or ($ExcRow.Direction -ne "") -or 
+            ($ExcRow.ProgramPath -ne ""))
+        {
+            if ((($ExcRow.SourceIP -eq "") -or ($ExcRow.SourceIP -eq $SrcAddress)) -and
+                (($ExcRow.SourcePort -eq "") -or ($ExcRow.SourcePort -eq $SrcPort)) -and
+                (($ExcRow.DestinationIP -eq "") -or ($ExcRow.DestinationIP -eq $DstAddress)) -and
+                (($ExcRow.DestinationPort -eq "") -or ($ExcRow.DestinationPort -eq $DstPort)) -and
+                (($ExcRow.Protocol -eq "") -or ($ExcRow.Protocol -eq $Protocol)) -and
+                (($ExcRow.Direction -eq "") -or ($ExcRow.Direction -eq $Direction)) -and
+                (($ExcRow.ProgramPath -eq "") -or ($ExcRow.ProgramPath -eq $AppName)) )
+            {
+                if ($Debug)
+                {
+                    Write-Host "Excluding" $ExcRow.SourceIP $ExcRow.SourcePort `
+                        $ExcRow.DestinationIP $ExcRow.DestinationPort `
+                        $ExcRow.Protocol $ExcRow.Direction $ExcRow.ProgramPath - $ExcRow.Note
+                }
+                Return $Event.Index
+            }
+        }
+    }
+
     if ($Compact)
     {
         Write-Host $EvTime.TimeOfDay.ToString() " " -NoNewline
@@ -283,6 +315,12 @@ function ParseEvent {
         Write-Host
     }
     $Event.Index
+}
+
+$ListExclusions = @()
+if ($Exclusions)
+{
+    $ListExclusions = Import-Csv $Exclusions
 }
 
 # Print some recent events
@@ -314,7 +352,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.4.3 - June 2022
+Version 1.5.0 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
