@@ -62,7 +62,7 @@ if (-not $(Test-Administrator))
         $Arguments += " -" + $_
         if ($PSBoundParameters[$_].GetType() -ne [System.Management.Automation.SwitchParameter])
         {
-            $Arguments += " " + $PSBoundParameters[$_]
+            $Arguments += " `"" + $PSBoundParameters[$_] + "`""
         }
     }
 
@@ -352,7 +352,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Dani's Tools Firewall Events
-Version 1.5.0 - June 2022
+Version 1.5.1 - June 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script. 
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log. 
