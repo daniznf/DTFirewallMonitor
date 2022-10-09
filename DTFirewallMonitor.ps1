@@ -42,6 +42,7 @@ param(
 )
 
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
+if ($FollowTime -lt 1) { $FollowTime = 1 }
 
 if (-not $(Test-Administrator))
 {
