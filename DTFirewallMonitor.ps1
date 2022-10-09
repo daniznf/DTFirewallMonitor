@@ -1,6 +1,6 @@
 ﻿<#
     Daniele's Tools Firewall Monitor
-    Copyright (C) 2022 Daniznf
+    Copyright (C) 2022 daniznf
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,10 @@ param(
 )
 
 function ParseEvent {
-    param([System.ComponentModel.Component] $Event)
+    param(
+        [System.ComponentModel.Component]
+        $Event
+    )
 
     if ($Verbose) { Write-Verbose ("Event index: " + $Event.Index) -Verbose }
 
@@ -54,8 +57,10 @@ function ParseEvent {
     $EvTime = $Event.TimeGenerated
 
     $MsgLines = $EvMsg.Split([System.Environment]::NewLine)
-    $MsgLines | ForEach-Object {
-        $Splitted = $_.Split(":")
+
+    for ($i = 0; $i -lt $MsgLines.Length ; $i++)
+    {
+        $Splitted = $MsgLines[$i].Split(":")
 
         $Left = $Splitted[0]
         $Right = $Splitted[1]
@@ -65,15 +70,15 @@ function ParseEvent {
             $Left = $Left.Trim()
             $Right = $Right.Trim()
 
-            if ($Verbose) { Write-Verbose ("{0}:{1}" -f $Left, $Right) -Verbose }
+            if ($Verbose) { Write-Verbose ("{0}: {1}" -f $Left, $Right) -Verbose }
 
             if ($Left.Equals("Application Name"))
             {
                 $AppName = $Right
-                # $AppName is something like
-                # \device\harddiskvolume1\program files\program\program.exe
-                # or something like
-                # System
+                # $AppName is something like:
+                #   \device\harddiskvolume1\program files\program\program.exe
+                # or something like:
+                #   System
                 if ($AppName.Contains("\"))
                 {
                     $Letter = (Get-Volume -FilePath $AppName).DriveLetter
@@ -231,11 +236,12 @@ function ParseEvent {
         }
     }
 
-    # ForEach-Object doesn't Return out of function
-    foreach ($ExcRow in $ListExclusions) {
-    # For each line of the CSV, that has at least one not empty value, all
-    # not empty values must be equal to this event's corresponding value
-    # to exclude this event
+    for ($j = 0; $j -lt $ListExclusions.Length; $j++)
+    {
+        $ExcRow = $ListExclusions[$j]
+        # For each line of the CSV, that has at least one not empty value, all
+        # not empty values must be equal to this event's corresponding value
+        # to exclude this event
         if (($ExcRow.SourceIP -ne "") -or ($ExcRow.SourcePort -ne "") -or
             ($ExcRow.DestinationIP -ne "") -or ($ExcRow.DestinationPort -ne "") -or
             ($ExcRow.Protocol -ne "") -or ($ExcRow.Direction -ne "") -or
@@ -255,7 +261,6 @@ function ParseEvent {
                         $ExcRow.DestinationIP, $ExcRow.DestinationPort,
                         $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.ProgramPath, $ExcRow.Note) -Verbose
                 }
-                Return $Event.Index
             }
         }
     }
@@ -282,13 +287,13 @@ function ParseEvent {
         Write-Host
     }
 
-    $Event.Index
+    return $Event.Index
 }
 
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
 if ($FollowTime -lt 1) { $FollowTime = 1 }
 
-if (-not $(Test-Administrator))
+if (-not (Test-Administrator))
 {
     Write-Output "Restarting as administrator..."
     Restart-AsAdministrator -BypassExecutionPolicy -BoundParameters $PSBoundParameters
@@ -304,8 +309,11 @@ if ($Exclusions)
 }
 
 # Print some recent events
-Get-EventLog -LogName Security -Newest $RecentEvents | Sort-Object -Property Index | ForEach-Object {
-    $OldIndex = ParseEvent $_
+$NewestEvents = Get-EventLog -LogName Security -Newest $RecentEvents | Sort-Object -Property Index
+
+for ($i = 0; $i -lt $NewestEvents.Length; $i++)
+{
+    $OldIndex = ParseEvent $NewestEvents[$i]
 }
 
 # Continue to follow new events
@@ -317,8 +325,10 @@ while ($true)
     {
         # Asking by index is really slow: Get-EventLog -LogName Security -Index $i
         $ListEvt = Get-EventLog -LogName Security -Newest ($NewIndex - $OldIndex) | Sort-Object -Property Index
-        $ListEvt | ForEach-Object {
-            $OldIndex = ParseEvent $_
+
+        for ($i = 0; $i -lt $ListEvt.Length; $i++)
+        {
+            $OldIndex = ParseEvent $ListEvt[$i]
         }
 
     }
@@ -332,7 +342,7 @@ while ($true)
 
 .DESCRIPTION
     Daniele's Tools Firewall Monitor
-    Version 1.6.7 - October 2022
+    Version 1.7.0 - October 2022
     Each time an application gets blocked by firewall it will be displayed briefly by this script.
     After displaying some recent events, every new event will be displayed (follow).
 
