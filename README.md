@@ -7,6 +7,10 @@ Copyright (C) 2022 daniznf
 Each time an application gets blocked by firewall it will be displayed **briefly** by this script.
 After displaying some recent events, every new event will be displayed (follow).
 
+### Requirements
+DTTestAdministrator module installed.
+https://github.com/daniznf/DTTestAdministrator
+
 ### Install
 When firewall blocks inbound or outbound communication, it has to be configured to log it in the Security log. Actually, it is the "Filtering Platform Connection" that writes the log. To have this log available, in the group policy "Audit Filtering Platform Connection" the "Failure" property must be checked.
 

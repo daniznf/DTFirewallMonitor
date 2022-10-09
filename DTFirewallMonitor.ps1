@@ -18,6 +18,8 @@
     https://github.com/daniznf/DTFirewallMonitor
 #>
 
+#Requires -Modules DTTestAdministrator
+
 param(
     [String]
     # CSV File path with items to exclude
@@ -42,31 +44,11 @@ param(
 
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
 
-function Test-Administrator
-{
-    # Returns true if this script is run as administrator
-    # thanks to https://serverfault.com/a/97599
-
-    $User = [Security.Principal.WindowsIdentity]::GetCurrent();
-    if ($Debug) { Write-Host $User.Name }
-    (New-Object Security.Principal.WindowsPrincipal $User).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-}
-
 if (-not $(Test-Administrator))
 {
     Write-Output "Restarting as administrator..."
+    Restart-AsAdministrator -BypassExecutionPolicy -BoundParameters $PSBoundParameters
 
-    $Arguments = "-ExecutionPolicy Bypass -File `"" + $MyInvocation.MyCommand.Path + "`""
-
-    $PSBoundParameters.Keys | ForEach-Object {
-        $Arguments += " -" + $_
-        if ($PSBoundParameters[$_].GetType() -ne [System.Management.Automation.SwitchParameter])
-        {
-            $Arguments += " `"" + $PSBoundParameters[$_] + "`""
-        }
-    }
-
-    Start-Process Powershell -Verb RunAs -ArgumentList $Arguments
     exit
 }
 
@@ -359,4 +341,5 @@ When firewall blocks inbound or outbound communication, it will log it in the Se
 Actually, it is the "Filtering Platform Connection" that writes the log.
 To have this log available, in the group policy "Audit Filtering Platform Connection"
 the "Failure" property must be checked.
+
 #>
