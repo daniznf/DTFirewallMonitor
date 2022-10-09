@@ -22,19 +22,15 @@
 
 param(
     [String]
-    # CSV File path with items to exclude
     $Exclusions,
 
     [Int32]
-    # Initially shows this number of events
     $RecentEvents = 20,
 
     [Int32]
-    # Time to wait between each follow cycle
     $FollowTime = 1,
 
     [switch]
-    # Show informations using less space
     $Compact,
 
     [switch]
@@ -332,16 +328,31 @@ while ($true)
 
 <#
 .SYNOPSIS
-Displays briefly what your firewall is blocking
+    Displays briefly what your firewall is blocking
 
 .DESCRIPTION
-Daniele's Tools Firewall Monitor
-Version 1.6.6 - October 2022
-Each time an application gets blocked by firewall it will be displayed briefly by this script.
-After displaying some recent events, every new event will be displayed (follow).
-When firewall blocks inbound or outbound communication, it will log it in the Security log.
-Actually, it is the "Filtering Platform Connection" that writes the log.
-To have this log available, in the group policy "Audit Filtering Platform Connection"
-the "Failure" property must be checked.
+    Daniele's Tools Firewall Monitor
+    Version 1.6.7 - October 2022
+    Each time an application gets blocked by firewall it will be displayed briefly by this script.
+    After displaying some recent events, every new event will be displayed (follow).
 
+.PARAMETER Exclusions
+    CSV File path with items to exclude
+
+.PARAMETER RecentEvents
+    Initially shows this number of events
+
+.PARAMETER FollowTime
+    Time to wait between each follow cycle
+
+.PARAMETER Compact
+    Show informations using less space
+
+.NOTES
+    When firewall blocks inbound or outbound communication, it will log it in the Security log.
+    To have this log available, the "Failure" property must be checked in the group policy "Audit Filtering Platform Connection".
+
+.EXAMPLE
+    DTFirewallMonitor.ps1 -RecentEvents 50 -FollowTime 5
+    Show firewall events starting with last 50 events and then waiting 5 seconds between each follow cycle.
 #>
