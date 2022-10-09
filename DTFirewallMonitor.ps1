@@ -38,8 +38,7 @@ param(
     $Compact,
 
     [switch]
-    # Show some additional informations
-    $Debug
+    $Verbose
 )
 
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
@@ -55,7 +54,7 @@ if (-not $(Test-Administrator))
 function ParseEvent {
     param([System.ComponentModel.Component] $Event)
 
-    if ($Debug) { Write-Host $Event.Index }
+    if ($Verbose) { Write-Verbose ("Event index: " + $Event.Index) -Verbose }
 
     # 5154 Listen permitted
     # 5155 Listen blocked
@@ -80,7 +79,7 @@ function ParseEvent {
             $Left = $Left.Trim()
             $Right = $Right.Trim()
 
-            if ($Debug) { Write-Host "|" $Left ":" $Right }
+            if ($Verbose) { Write-Verbose ("{0}:{1}" -f $Left, $Right) -Verbose }
 
             if ($Left.Equals("Application Name"))
             {
@@ -264,11 +263,11 @@ function ParseEvent {
                 (($ExcRow.Direction -eq "") -or ($ExcRow.Direction -eq $Direction)) -and
                 (($ExcRow.ProgramPath -eq "") -or ($ExcRow.ProgramPath -eq $AppName)) )
             {
-                if ($Debug)
+                if ($Verbose)
                 {
-                    Write-Host "Excluding" $ExcRow.SourceIP $ExcRow.SourcePort `
-                        $ExcRow.DestinationIP $ExcRow.DestinationPort `
-                        $ExcRow.Protocol $ExcRow.Direction $ExcRow.ProgramPath - $ExcRow.Note
+                    Write-Verbose ( "Excluding {0}:{1} {2}:{3} {4} {5} {6} - {7}" -f $ExcRow.SourceIP, $ExcRow.SourcePort,
+                        $ExcRow.DestinationIP, $ExcRow.DestinationPort,
+                        $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.ProgramPath, $ExcRow.Note) -Verbose
                 }
                 Return $Event.Index
             }
@@ -296,12 +295,14 @@ function ParseEvent {
         Write-Host "Destination:".PadRight($PadLenght) $DstAddress.PadRight(15) ":" $DstPort
         Write-Host
     }
+
     $Event.Index
 }
 
 $ListExclusions = @()
 if ($Exclusions)
 {
+    if ($Verbose) { Write-Verbose "Reading csv $Exclusions ..." -Verbose}
     $ListExclusions = Import-Csv $Exclusions
 }
 
@@ -314,7 +315,7 @@ Get-EventLog -LogName Security -Newest $RecentEvents | Sort-Object -Property Ind
 while ($true)
 {
     $NewIndex = (Get-EventLog -LogName Security -Newest 1).Index
-    if ($Debug) { Write-Host "Old Index: " $OldIndex  "; New Index: " $NewIndex }
+    if ($Verbose) { Write-Verbose ("Old Index: {0}; New Index: {1}" -f $OldIndex, $NewIndex)  -Verbose}
     if ($NewIndex -gt $OldIndex)
     {
         # Asking by index is really slow: Get-EventLog -LogName Security -Index $i
@@ -334,7 +335,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Daniele's Tools Firewall Monitor
-Version 1.6 - October 2022
+Version 1.6.1 - October 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script.
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log.
