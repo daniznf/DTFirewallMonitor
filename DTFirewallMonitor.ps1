@@ -41,17 +41,6 @@ param(
     $Verbose
 )
 
-if ($RecentEvents -lt 1) { $RecentEvents = 1 }
-if ($FollowTime -lt 1) { $FollowTime = 1 }
-
-if (-not $(Test-Administrator))
-{
-    Write-Output "Restarting as administrator..."
-    Restart-AsAdministrator -BypassExecutionPolicy -BoundParameters $PSBoundParameters
-
-    exit
-}
-
 function ParseEvent {
     param([System.ComponentModel.Component] $Event)
 
@@ -300,6 +289,17 @@ function ParseEvent {
     $Event.Index
 }
 
+if ($RecentEvents -lt 1) { $RecentEvents = 1 }
+if ($FollowTime -lt 1) { $FollowTime = 1 }
+
+if (-not $(Test-Administrator))
+{
+    Write-Output "Restarting as administrator..."
+    Restart-AsAdministrator -BypassExecutionPolicy -BoundParameters $PSBoundParameters
+
+    exit
+}
+
 $ListExclusions = @()
 if ($Exclusions)
 {
@@ -336,7 +336,7 @@ Displays briefly what your firewall is blocking
 
 .DESCRIPTION
 Daniele's Tools Firewall Monitor
-Version 1.6.1 - October 2022
+Version 1.6.6 - October 2022
 Each time an application gets blocked by firewall it will be displayed briefly by this script.
 After displaying some recent events, every new event will be displayed (follow).
 When firewall blocks inbound or outbound communication, it will log it in the Security log.
