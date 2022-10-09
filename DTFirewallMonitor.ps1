@@ -1,5 +1,5 @@
 ﻿<#
-    Dani's Tools Firewall Events
+    Daniele's Tools Firewall Monitor
     Copyright (C) 2022 Daniznf
 
     This program is free software: you can redistribute it and/or modify
@@ -14,8 +14,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-    
-    https://github.com/daniznf/DTFirewallEvents
+
+    https://github.com/daniznf/DTFirewallMonitor
 #>
 
 param(
@@ -23,10 +23,10 @@ param(
     # CSV File path with items to exclude
     $Exclusions,
 
-    [Int32] 
+    [Int32]
     # Initially shows this number of events
     $RecentEvents = 20,
-    
+
     [Int32]
     # Time to wait between each follow cycle
     $FollowTime = 1,
@@ -42,11 +42,11 @@ param(
 
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
 
-function Test-Administrator  
-{  
+function Test-Administrator
+{
     # Returns true if this script is run as administrator
     # thanks to https://serverfault.com/a/97599
-    
+
     $User = [Security.Principal.WindowsIdentity]::GetCurrent();
     if ($Debug) { Write-Host $User.Name }
     (New-Object Security.Principal.WindowsPrincipal $User).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
@@ -55,9 +55,9 @@ function Test-Administrator
 if (-not $(Test-Administrator))
 {
     Write-Output "Restarting as administrator..."
-     
+
     $Arguments = "-ExecutionPolicy Bypass -File `"" + $MyInvocation.MyCommand.Path + "`""
-    
+
     $PSBoundParameters.Keys | ForEach-Object {
         $Arguments += " -" + $_
         if ($PSBoundParameters[$_].GetType() -ne [System.Management.Automation.SwitchParameter])
@@ -82,7 +82,7 @@ function ParseEvent {
     # 5158 Bind permitted
     # 5159 Bind blocked
     if ($Event.InstanceId -NotIn "5154","5155","5156","5157","5158","5159") { Return $Event.Index }
-    
+
     $EvMsg = $Event.Message
     $EvTime = $Event.TimeGenerated
 
@@ -92,7 +92,7 @@ function ParseEvent {
 
         $Left = $Splitted[0]
         $Right = $Splitted[1]
-        
+
         if ($Left -ne $null -and $Right -ne $null)
         {
             $Left = $Left.Trim()
@@ -103,7 +103,7 @@ function ParseEvent {
             if ($Left.Equals("Application Name"))
             {
                 $AppName = $Right
-                # $AppName is something like 
+                # $AppName is something like
                 # \device\harddiskvolume1\program files\program\program.exe
                 # or something like
                 # System
@@ -112,7 +112,7 @@ function ParseEvent {
                     $Letter = (Get-Volume -FilePath $AppName).DriveLetter
                     $AppName = $AppName.Remove(0, $AppName.IndexOf("\",1))
                     $AppName = $AppName.Remove(0, $AppName.IndexOf("\",1))
-                    $AppName = $Letter + ":" + $AppName 
+                    $AppName = $Letter + ":" + $AppName
                 }
             }
 
@@ -176,16 +176,16 @@ function ParseEvent {
                     # Internet Control Message
                     1 { $Protocol = "ICMP" }
                 }
-                    
+
                 switch ($Right)
                 {
                     # Internet Group Management
                     2 { $Protocol = "IGMP" }
                 }
-                    
+
                 switch ($Right)
                 {
-                    # IPv4 Encapsulation 
+                    # IPv4 Encapsulation
                     4 { $Protocol = "IPv4" }
                 }
 
@@ -194,19 +194,19 @@ function ParseEvent {
                     # Transmission Control
                     6 { $Protocol = "TCP" }
                 }
-                    
+
                 switch ($Right)
                 {
                     # User Datagram
                     17 { $Protocol = "UDP" }
                 }
-                    
+
                 switch ($Right)
                 {
                     # IPv6 Encapsulation
                     41 { $Protocol = "IPv6" }
                 }
-                    
+
                 switch ($Right)
                 {
                     # Routing Header for IPv6
@@ -263,15 +263,15 @@ function ParseEvent {
             }
         }
     }
-    
+
     # ForEach-Object doesn't Return out of function
     foreach ($ExcRow in $ListExclusions) {
     # For each line of the CSV, that has at least one not empty value, all
     # not empty values must be equal to this event's corresponding value
     # to exclude this event
-        if (($ExcRow.SourceIP -ne "") -or ($ExcRow.SourcePort -ne "") -or 
-            ($ExcRow.DestinationIP -ne "") -or ($ExcRow.DestinationPort -ne "") -or 
-            ($ExcRow.Protocol -ne "") -or ($ExcRow.Direction -ne "") -or 
+        if (($ExcRow.SourceIP -ne "") -or ($ExcRow.SourcePort -ne "") -or
+            ($ExcRow.DestinationIP -ne "") -or ($ExcRow.DestinationPort -ne "") -or
+            ($ExcRow.Protocol -ne "") -or ($ExcRow.Direction -ne "") -or
             ($ExcRow.ProgramPath -ne ""))
         {
             if ((($ExcRow.SourceIP -eq "") -or ($ExcRow.SourceIP -eq $SrcAddress)) -and
@@ -308,7 +308,7 @@ function ParseEvent {
         $PadLenght = 12
         Write-Host $EvTime
         Write-Host "Application:".PadRight($PadLenght) "($ProcID)" $AppName
-        Write-Host "Protocol:".PadRight($PadLenght) $Protocol "" -NoNewline 
+        Write-Host "Protocol:".PadRight($PadLenght) $Protocol "" -NoNewline
         Write-Host $Direction -BackgroundColor $BgColor -ForegroundColor $FgColor
         Write-Host "Source:".PadRight($PadLenght) $SrcAddress.PadRight(15) ":" $SrcPort
         Write-Host "Destination:".PadRight($PadLenght) $DstAddress.PadRight(15) ":" $DstPort
@@ -351,12 +351,12 @@ while ($true)
 Displays briefly what your firewall is blocking
 
 .DESCRIPTION
-Dani's Tools Firewall Events
-Version 1.5.1 - June 2022
-Each time an application gets blocked by firewall it will be displayed briefly by this script. 
+Daniele's Tools Firewall Monitor
+Version 1.6 - October 2022
+Each time an application gets blocked by firewall it will be displayed briefly by this script.
 After displaying some recent events, every new event will be displayed (follow).
-When firewall blocks inbound or outbound communication, it will log it in the Security log. 
-Actually, it is the "Filtering Platform Connection" that writes the log. 
-To have this log available, in the group policy "Audit Filtering Platform Connection" 
+When firewall blocks inbound or outbound communication, it will log it in the Security log.
+Actually, it is the "Filtering Platform Connection" that writes the log.
+To have this log available, in the group policy "Audit Filtering Platform Connection"
 the "Failure" property must be checked.
 #>

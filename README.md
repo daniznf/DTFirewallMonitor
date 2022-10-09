@@ -1,7 +1,7 @@
-# Dani's Tools Firewall Events
-DTFirewallEvents  
-Displays briefly what your firewall is blocking  
-Copyright (C) 2022 Daniznf
+# Daniele's Tools Firewall Monitor
+DTFirewallMonitor
+Displays briefly what your firewall is blocking
+Copyright (C) 2022 daniznf
 
 ### Description
 Each time an application gets blocked by firewall it will be displayed **briefly** by this script.
@@ -46,6 +46,6 @@ Destination: 192.168.100.101 : 80
 
 ### Help
 ```
-Get-Help .\DTFirewallEvents.ps1
+Get-Help .\DTFirewallMonitor.ps1
 ```
 
