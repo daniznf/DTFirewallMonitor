@@ -20,7 +20,7 @@
 
 <#PSScriptInfo
 
-.VERSION 1.9
+.VERSION 1.10
 
 .GUID 23902d50-3002-4336-b75c-eca95651f051
 
@@ -52,21 +52,23 @@
 #Requires -Modules DTTestAdministrator
 
 param(
+    [Parameter(ParameterSetName="Default")]
     [String]
     $Exclusions,
 
+    [Parameter(ParameterSetName="Default")]
     [Int32]
     $RecentEvents = 20,
 
+    [Parameter(ParameterSetName="Default")]
     [Int32]
     $FollowTime = 1,
 
+    [Parameter(ParameterSetName="Default")]
     [switch]
     $Compact,
 
-    [switch]
-    $Verbose,
-
+    [Parameter(Mandatory, ParameterSetName="Version")]
     [switch]
     $Version
 )
@@ -99,7 +101,7 @@ function ParseEvent {
         $Event
     )
 
-    if ($Verbose) { Write-Verbose ("Event index: " + $Event.Index) -Verbose }
+    Write-Verbose ("Event index: " + $Event.Index)
 
     # 5154 Listen permitted
     # 5155 Listen blocked
@@ -126,7 +128,7 @@ function ParseEvent {
             $Left = $Left.Trim()
             $Right = $Right.Trim()
 
-            if ($Verbose) { Write-Verbose ("{0}: {1}" -f $Left, $Right) -Verbose }
+            Write-Verbose ("{0}: {1}" -f $Left, $Right)
 
             if ($Left.Equals("Application Name"))
             {
@@ -311,12 +313,9 @@ function ParseEvent {
                 (($ExcRow.Direction -eq "") -or ($ExcRow.Direction -eq $Direction)) -and
                 (($ExcRow.ProgramPath -eq "") -or ($ExcRow.ProgramPath -eq $AppName)) )
             {
-                if ($Verbose)
-                {
-                    Write-Verbose ( "Excluding {0}:{1} {2}:{3} {4} {5} {6} - {7}" -f $ExcRow.SourceIP, $ExcRow.SourcePort,
-                        $ExcRow.DestinationIP, $ExcRow.DestinationPort,
-                        $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.ProgramPath, $ExcRow.Note) -Verbose
-                }
+                Write-Verbose ( "Excluding {0}:{1} {2}:{3} {4} {5} {6} - {7}" -f $ExcRow.SourceIP, $ExcRow.SourcePort,
+                    $ExcRow.DestinationIP, $ExcRow.DestinationPort,
+                    $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.ProgramPath, $ExcRow.Note)
             }
         }
     }
@@ -371,7 +370,7 @@ if (-not (Test-Administrator))
 $ListExclusions = @()
 if ($Exclusions)
 {
-    if ($Verbose) { Write-Verbose "Reading csv $Exclusions ..." -Verbose}
+    Write-Verbose "Reading csv $Exclusions ..."
     $ListExclusions = Import-Csv $Exclusions
 }
 
@@ -387,7 +386,7 @@ for ($i = 0; $i -lt $NewestEvents.Length; $i++)
 while ($true)
 {
     $NewIndex = (Get-EventLog -LogName Security -Newest 1).Index
-    if ($Verbose) { Write-Verbose ("Old Index: {0}; New Index: {1}" -f $OldIndex, $NewIndex)  -Verbose}
+    Write-Verbose ("Old Index: {0}; New Index: {1}" -f $OldIndex, $NewIndex)
     if ($NewIndex -gt $OldIndex)
     {
         # Asking by index is really slow: Get-EventLog -LogName Security -Index $i
