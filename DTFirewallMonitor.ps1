@@ -18,6 +18,37 @@
     https://github.com/daniznf/DTFirewallMonitor
 #>
 
+<#PSScriptInfo
+
+.VERSION 1.8
+
+.GUID 23902d50-3002-4336-b75c-eca95651f051
+
+.AUTHOR daniznf
+
+.COMPANYNAME
+
+.COPYRIGHT (c) 2022 daniznf. All rights reserved.
+
+.TAGS Firewall Events Monitor
+
+.LICENSEURI https://www.gnu.org/licenses/gpl-3.0.txt
+
+.PROJECTURI https://github.com/daniznf/DTFirewallMonitor
+
+.ICONURI
+
+.EXTERNALMODULEDEPENDENCIES DTTestAdministrator
+
+.REQUIREDSCRIPTS
+
+.EXTERNALSCRIPTDEPENDENCIES
+
+.RELEASENOTES
+
+#>
+
+
 #Requires -Modules DTTestAdministrator
 
 param(
@@ -341,8 +372,6 @@ while ($true)
     Displays briefly what your firewall is blocking
 
 .DESCRIPTION
-    Daniele's Tools Firewall Monitor
-    Version 1.7.0 - October 2022
     Each time an application gets blocked by firewall it will be displayed briefly by this script.
     After displaying some recent events, every new event will be displayed (follow).
 
