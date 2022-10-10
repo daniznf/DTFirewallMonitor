@@ -20,7 +20,7 @@
 
 <#PSScriptInfo
 
-.VERSION 1.10
+.VERSION 1.10.1
 
 .GUID 23902d50-3002-4336-b75c-eca95651f051
 
@@ -316,6 +316,9 @@ function ParseEvent {
                 Write-Verbose ( "Excluding {0}:{1} {2}:{3} {4} {5} {6} - {7}" -f $ExcRow.SourceIP, $ExcRow.SourcePort,
                     $ExcRow.DestinationIP, $ExcRow.DestinationPort,
                     $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.ProgramPath, $ExcRow.Note)
+
+                # Do not print anything, just return
+                return $Event.Index
             }
         }
     }
