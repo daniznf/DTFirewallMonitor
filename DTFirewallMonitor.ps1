@@ -20,7 +20,7 @@
 
 <#PSScriptInfo
 
-.VERSION 1.8
+.VERSION 1.9
 
 .GUID 23902d50-3002-4336-b75c-eca95651f051
 
@@ -65,8 +65,33 @@ param(
     $Compact,
 
     [switch]
-    $Verbose
+    $Verbose,
+
+    [switch]
+    $Version
 )
+
+function Get-Version()
+{
+    try
+    {
+        $Content = Get-Content -Path $MyInvocation.ScriptName
+        for ($i = 0; $i -lt $Content.Length; $i++)
+        {
+            $Line = $Content[$i].Trim()
+            if ($Line.Contains(".VERSION"))
+            {
+                $Split = $Line.Split(" " )
+                return [version]::new($Split[1])
+            }
+        }
+    }
+    catch
+    {
+        Write-Host $_
+        exit 1
+    }
+}
 
 function ParseEvent {
     param(
@@ -321,6 +346,17 @@ function ParseEvent {
     return $Event.Index
 }
 
+if ($Version)
+{
+    $Ver = Get-Version
+    if ($Ver)
+    {
+        Write-Host ("{0} - Version {1}" -f $MyInvocation.MyCommand.Name, $Ver.ToString())
+        exit 0
+    }
+    exit 1
+}
+
 if ($RecentEvents -lt 1) { $RecentEvents = 1 }
 if ($FollowTime -lt 1) { $FollowTime = 1 }
 
@@ -386,6 +422,9 @@ while ($true)
 
 .PARAMETER Compact
     Show informations using less space
+
+.PARAMETER Version
+    Print script version and exit
 
 .NOTES
     When firewall blocks inbound or outbound communication, it will log it in the Security log.
