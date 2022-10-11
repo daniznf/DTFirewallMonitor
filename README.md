@@ -1,22 +1,25 @@
 # Daniele's Tools Firewall Monitor
-DTFirewallMonitor
-Displays briefly what your firewall is blocking
+DTFirewallMonitor<br>
+Displays briefly what your firewall is blocking.<br>
 Copyright (C) 2022 daniznf
 
 ### Description
+This script can be run when you want to see in realtime what your firewall is blocking.
 Each time an application gets blocked by firewall it will be displayed **briefly** by this script.
-After displaying some recent events, every new event will be displayed (follow).
+After displaying some recent events, every new event will be displayed (follow).<br>
+By editing the included CSV (and passing it with the parameter -Exclusions), unwanted events can be excluded from the monitor.
 
 ### Requirements
 DTTestAdministrator module installed.
 https://github.com/daniznf/DTTestAdministrator
 
 ### Install
-When firewall blocks inbound or outbound communication, it has to be configured to log it in the Security log. Actually, it is the "Filtering Platform Connection" that writes the log. To have this log available, in the group policy "Audit Filtering Platform Connection" the "Failure" property must be checked.
+By setting the firewall to block all Inbound and Outbound connections that do not match a rule, only traffic explicitly permitted by rules will flow, while blocked traffic will be logged into the system's Security log,
+and at the same time this monitor script will be able to retrieve it. <br/>
+To have this log available, the "Failure" property in the group policy "Audit Filtering Platform Connection" must be checked.
 
 ### Run
-Right click on this script and chose "Run with Powershell" (double-clicking will not work) or launch this script from powershell.
-
+Right click on this script and choose "Run with Powershell" or launch this script from powershell.
 
 ### Output example
 ```
@@ -39,7 +42,10 @@ Source:      10.0.0.3        : 30123
 Destination: 192.168.100.101 : 80
 ```
 
-### Compact mode
+### Output example in Compact mode
+```
+PS C:\> .\DTFirewallMonitor.ps1 -Compact
+```
 ```
 16:34:51  (9012) application1.exe UDP OUT
 192.168.100.1: 40123  -> 10.0.0.4: 80
@@ -48,8 +54,13 @@ Destination: 192.168.100.101 : 80
 10.0.0.4: 40123  -> 192.168.100.1 : 443
 ```
 
+### Exclude events by CSV exclusions
+```
+PS C:\> .\DTFirewallMonitor.ps1 -Exclusions $env:USERPROFILE\Exclusions.csv
+```
+
 ### Help
 ```
-Get-Help .\DTFirewallMonitor.ps1
+PS C:\> Get-Help .\DTFirewallMonitor.ps1
 ```
 
