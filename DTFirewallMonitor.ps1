@@ -20,7 +20,7 @@
 
 <#PSScriptInfo
 
-.VERSION 1.10.3
+.VERSION 1.11.0
 
 .GUID 23902d50-3002-4336-b75c-eca95651f051
 
@@ -83,7 +83,7 @@ function Get-Version()
             $Line = $Content[$i].Trim()
             if ($Line.Contains(".VERSION"))
             {
-                $Split = $Line.Split(" " )
+                $Split = $Line.Split(" ")
                 return [version]::new($Split[1])
             }
         }
@@ -303,7 +303,7 @@ function ParseEvent {
         if (($ExcRow.SourceIP -ne "") -or ($ExcRow.SourcePort -ne "") -or
             ($ExcRow.DestinationIP -ne "") -or ($ExcRow.DestinationPort -ne "") -or
             ($ExcRow.Protocol -ne "") -or ($ExcRow.Direction -ne "") -or
-            ($ExcRow.ProgramPath -ne ""))
+            ($ExcRow.Application -ne ""))
         {
             if ((($ExcRow.SourceIP -eq "") -or ($ExcRow.SourceIP -eq $SrcAddress)) -and
                 (($ExcRow.SourcePort -eq "") -or ($ExcRow.SourcePort -eq $SrcPort)) -and
@@ -311,11 +311,13 @@ function ParseEvent {
                 (($ExcRow.DestinationPort -eq "") -or ($ExcRow.DestinationPort -eq $DstPort)) -and
                 (($ExcRow.Protocol -eq "") -or ($ExcRow.Protocol -eq $Protocol)) -and
                 (($ExcRow.Direction -eq "") -or ($ExcRow.Direction -eq $Direction)) -and
-                (($ExcRow.ProgramPath -eq "") -or ($ExcRow.ProgramPath -eq $AppName)) )
+                (($ExcRow.Application -eq "") -or ($AppName.Contains($ExcRow.Application))))
             {
                 Write-Verbose ( "Excluding {0}:{1} {2}:{3} {4} {5} {6} - {7}" -f $ExcRow.SourceIP, $ExcRow.SourcePort,
                     $ExcRow.DestinationIP, $ExcRow.DestinationPort,
-                    $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.ProgramPath, $ExcRow.Note)
+                    $ExcRow.Protocol, $ExcRow.Direction, $ExcRow.Application, $ExcRow.Note)
+
+                    Write-Verbose ""
 
                 # Do not print anything, just return
                 return $Event.Index
@@ -326,7 +328,7 @@ function ParseEvent {
     if ($Compact)
     {
         Write-Host $EvTime.TimeOfDay.ToString() " " -NoNewline
-        Write-Host "($ProcID)" ( Split-Path $AppName -Leaf ) "" -NoNewline
+        Write-Host "($ProcID)" (Split-Path $AppName -Leaf) "" -NoNewline
         Write-Host $Protocol "" -NoNewline
         Write-Host $Direction -BackgroundColor $BgColor -ForegroundColor $FgColor
         Write-Host $SrcAddress":" $SrcPort " -> " -NoNewline

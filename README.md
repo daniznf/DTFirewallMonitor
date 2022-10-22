@@ -7,7 +7,7 @@ Copyright (C) 2022 daniznf
 This script can be run when you want to see in realtime what your firewall is blocking.
 Each time an application gets blocked by firewall it will be displayed **briefly** by this script.
 After displaying some recent events, every new event will be displayed (follow).<br>
-By editing the included CSV (and passing it with the parameter -Exclusions), unwanted events can be excluded from the monitor.
+By editing the included CSV (and passing it via the parameter -Exclusions), unwanted events can be excluded from the monitor.
 
 ### Requirements
 DTTestAdministrator module installed.
